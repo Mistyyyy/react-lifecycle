@@ -19,7 +19,7 @@ this is a rep introduce react-lifeclcle
 
 #### getDerivedStateFromProps
 
-  1. 返回值 object 
+  1. 返回值 object 
   2. 参数(nextProps, prevState)
   3. 该组件的生命周期是在react v16.3加入的 是一个静态方法
   4. 取代componentWillMount 与 componentWillReceiveProps生命周期 无法获得实例的this
@@ -39,9 +39,9 @@ this is a rep introduce react-lifeclcle
 
 #### componentDidMount
   1. 返回值 void
-  2. 该生命周期是在组件初始化之后 render之后挂载到页面上执行，全局只会调用一次，属于安全当生命周期
+  2. 该生命周期是在组件初始化之后 render之后挂载到页面上执行，全局只会调用一次，属于安全的生命周期
   3. 此时 render已经生成了Vdom并且patch成了真实的dom挂载到页面上。
-  4. 网络请求当数据都应该在该生命周期调用而不应该在componentWillMount时调用，理由如下：
+  4. 网络请求的数据都应该在该生命周期调用而不应该在componentWillMount时调用，理由如下：
   5. 对于请求的数据 属于异步操作 而render是同步执行，也就是当数据请求到了，组件已经挂载到页面上了，会进行一次空渲染 这时候会出现一个短暂的loading期间，等待数据进行render。这就意味着在componentWillMount进行数据请求并setSetate意义不大，不如放置安全的生命周期中。
 
 
@@ -49,7 +49,7 @@ this is a rep introduce react-lifeclcle
 
 #### 这个阶段 组件处于活性状态。状态的改变以及父组件的rerender，props的改变都会造成组件的更新
 
-#### 该阶段生命周期执行的流程（加入新的生命周期）
+#### 该阶段生命周期执行的流程（加入新的生命周期）
 
 #### componentWillReceiveProps / getDerivedStateFromProps -> shouldComponentUpdate(return true) ->componentWillUpdate -> render -> getSnapshotBeforeUpdate -> componentDidUpdate
 
@@ -81,13 +81,13 @@ this is a rep introduce react-lifeclcle
 #### render
 
   1. 返回值 Vdom 
-  2. 在该方法中 更新的state和props才会被获取到
+  2. 在该方法中 更新后的state和props会被获取到
 
 #### getSnapshotBeforeUpdate
 
   1. 返回值any 参数(prevProps, prevState)
   2. 该生命周期新增在react v16.3 版本中 
-  3. 可以获取到dom信息，返回值作为下一个生命周期componentDidUpdate的第三个参数传入。
+  3. 可以获取到dom信息,返回值作为下一个生命周期componentDidUpdate的第三个参数传入。
   4. 在该方法中 尽量避免setState 因为可能陷入死循环 如果有必要 请务必进行有条件的setState
   5. 理由 getSnapshotBeforeUpdate => setState => shouldComponentUpdate => componentWillUpdate => render => getSnapshotBeforeUpdate => setState => ....
   6. 首次渲染不会调用
@@ -99,7 +99,7 @@ this is a rep introduce react-lifeclcle
   3. 此时 可以用this.props 和 this.state 获取到最新的 props 和 state了
   4. 在该生命周期中 可以操作实际 的dom 因为已经渲染到页面上了
   5. 在该方法中 尽量避免setState 因为可能陷入死循环 如果有必要 请务必进行有条件的setState
-  6. 理由 componentDidUpdate =》 setState =》 shouldComponentUpdate => componentWillUpdate => render => componentDidUpdate => setState => ...
+  6. 理由 componentDidUpdate => setState => shouldComponentUpdate => componentWillUpdate => render => componentDidUpdate => setState => ...
   7. 首次渲染不会调用
 
 
@@ -107,4 +107,4 @@ this is a rep introduce react-lifeclcle
 
 #### componentUnMount
 
-  1.在组件卸载的时候调用，通常在这个生命周期中释放内存,解绑时间。防止出错 内存泄漏
+  1.在组件卸载的时候调用，通常在这个生命周期中释放内存,解绑事件。防止出错 内存泄漏
