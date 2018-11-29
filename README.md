@@ -17,6 +17,8 @@ this is a rep introduce react-lifeclcle
   2. 在初始化阶段 在componentWillMount中进行setState操作，我们都知道setState不会立刻执行，那么初始化渲染会包含此次状态改变吗？
 
 
+
+
 #### getDerivedStateFromProps
 
   1. 返回值 object 
@@ -27,6 +29,42 @@ this is a rep introduce react-lifeclcle
   6. 返回一个对象，作用相当于setState，不同于setState的是 setState会触发getDerivedStateFromProps这个方法，而该方法返回的不会触发(直接触发 shouldComponentUpdate 注：初始化渲染不触发) 其他都和setState的作用一样，这就是为什么在该方法中进行改变状态不会触发死循环的原因。如果不需要改变状态 返回null
   7. 该生命周期在整个组件的生命周期内会执行多次
 
+```
+  // 父组件
+  const Parent = props => <Main content="this is conent" title="title is" />
+  // 自组件
+  class Main extends React.Component {
+    state = {
+      content:'',
+      title: ''
+    }
+    static getDerivedStateFromProps(nextProps, prevState) {
+      console.log('getDerivedStateFromProps', nextProps)
+      if (prevState.content !== nextProps.content || prevState.content !== nextProps.content) {
+        return {
+          content: nextProps.content,
+          title: nextProps.title
+        }
+      }
+      return null
+    }
+
+    render() {
+      console.log('render')
+      return (
+        <div>
+          <p>{this.state.content}</p>
+          <p>{this.state.title}</p>
+        <div>
+      )
+    }
+  }
+
+  // 输出：getDerivedStateFromProps {content: 'this is content', title: 'title is'}
+  // render
+  // 由此可见 初始化阶段时，render只会执行一次
+```
+
 
 #### componentWillMount
   1. 返回值 void
@@ -36,6 +74,32 @@ this is a rep introduce react-lifeclcle
   5. 目前来看 该生命周期在整个组件的生命周期内只会执行一次
   6. 该方法不可以和getDerivedStateFromProps, react会给出警告，这是一个不安全的生命周期。
 
+```
+class Main extends React.Component {
+  state = {
+    count: 0
+  }
+  componentWillMount() {
+    this.setState({
+      count: this.state.count + 1
+    })
+    this.setState({
+      count: this.state.count + 1
+    })
+    this.setState({
+      count: this.state.count + 1
+    })
+  }
+
+  render() {
+    console.log('render')
+    return (
+      <div>{this.state.conut}</div>
+    )
+  }
+  // 输出 num 为1 只执行了一遍render 说明多次的setState被合并了
+}
+```
 
 #### componentDidMount
   1. 返回值 void
@@ -45,19 +109,30 @@ this is a rep introduce react-lifeclcle
   5. 对于请求的数据 属于异步操作 而render是同步执行，也就是当数据请求到了，组件已经挂载到页面上了，会进行一次空渲染 这时候会出现一个短暂的loading期间，等待数据进行render。这就意味着在componentWillMount进行数据请求并setSetate意义不大，不如放置安全的生命周期中。
 
 
+
+
 ### 更新阶段
 
-#### 这个阶段 组件处于活性状态。状态的改变以及父组件的rerender，props的改变都会造成组件的更新
+#### 这个阶段 组件处于活性状态。状态的改变以及父组件的rerender的时候都会造成组件的更新
+说明：父组件的rerender无论是否影响到自组件的props，都会导致子组件更新
 
 #### 该阶段生命周期执行的流程（加入新的生命周期）
 
 #### componentWillReceiveProps / getDerivedStateFromProps -> shouldComponentUpdate(return true) ->componentWillUpdate -> render -> getSnapshotBeforeUpdate -> componentDidUpdate
 
-#### componentWillReceiveProps
+#### getDerivedStateFromProps
 
   1. 返回值 object  参数(nextProps, prevState)
   2. 初始化渲染的时候已经介绍过这个生命周期了。这里不在做具体介绍
   3. 在该生命周期内 返回除了null以外的对象都相当于 执行了setState方法 但是跟普通的setState区别在于 普通的setState即状态改变 在触发渲染之前会进入该生命周期。而该方法返回的不会再次触发该生命周期。所以不会造成死循环
+  4. 会执行多次 首次渲染会执行
+
+#### componentWillReceiveProps
+  1. 返回值 void 参数 （nextProps)
+  2. 该生命周期被废弃了 在react v16.3 版本中
+  3. 该方法在更新期间会被调用 当父组件的rerender时触发该方法，组件自身的state改变时，不会触发。而是直接触发shouldComponentUpdate
+  4. 可以在该生命周期内进行setState,但是不推荐。
+  5. 首次渲染不会触发
 
 #### shouldComponentUpdate
 
